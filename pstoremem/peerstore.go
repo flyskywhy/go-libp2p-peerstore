@@ -26,19 +26,19 @@ type Option interface{}
 // NewPeerstore creates an in-memory threadsafe collection of peers.
 // It's the caller's responsibility to call RemovePeer to ensure
 // that memory consumption of the peerstore doesn't grow unboundedly.
-func NewPeerstore(opts ...Option) (*pstoremem, error) {
+func NewPeerstore(opts ...Option) *pstoremem {
 	var protoBookOpts []ProtoBookOption
 	for _, opt := range opts {
 		switch o := opt.(type) {
 		case ProtoBookOption:
 			protoBookOpts = append(protoBookOpts, o)
 		default:
-			return nil, fmt.Errorf("unexpected peer store option: %v", o)
+			return nil
 		}
 	}
 	pb, err := NewProtoBook(protoBookOpts...)
 	if err != nil {
-		return nil, err
+		return nil
 	}
 	return &pstoremem{
 		Metrics:            pstore.NewMetrics(),
@@ -46,7 +46,7 @@ func NewPeerstore(opts ...Option) (*pstoremem, error) {
 		memoryAddrBook:     NewAddrBook(),
 		memoryProtoBook:    pb,
 		memoryPeerMetadata: NewPeerMetadata(),
-	}, nil
+	}
 }
 
 func (ps *pstoremem) Close() (err error) {
